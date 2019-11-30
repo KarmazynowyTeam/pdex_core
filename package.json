@@ -11,9 +11,12 @@
     "ethereum-waffle": "^2.1.0",
     "openzeppelin-solidity": "^2.4.0",
     "tsc": "^1.20150623.0",
+    "typechain": "^1.0.3",
+    "typechain-target-ethers": "^1.0.3",
     "typescript": "^3.7.2"
   },
   "scripts": {
+    "build:typechain": "npx typechain --target=ethers './build/contracts/*.json' --outDir=./typechain",
     "build:contracts": "waffle .waffle.js",
     "build": "tsc"
   }
