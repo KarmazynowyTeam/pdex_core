@@ -1,6 +1,7 @@
 .DS_Store
 build/
 dist/
+typechain-build/
 node_modules/
 npm-debug.log*
 yarn-debug.log*
