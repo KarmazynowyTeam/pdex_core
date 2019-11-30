@@ -1,7 +1,9 @@
 pragma solidity 0.5.10;
 
 import 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
+using SafeMath for uint;
 
 contract PdexCore {
 
@@ -18,6 +20,8 @@ contract PdexCore {
         address fromBroker;
         uint sharesSupply;
         uint initialSharePrice;
+
+        uint payoutAmount;
     }
 
     // Events
@@ -25,6 +29,7 @@ contract PdexCore {
     event BrokerApproved(address brokerAddress);
     event CompanyRegistered(address indexed byBroker, address companyAddress);
     event InvestorRegistered(address indexed byBroker, address investorAddress, uint maxRiskRatio);
+    event PayoutClaimed(address indexed byCompany, uint amount);
 
     address owner;
     address knf;
@@ -66,6 +71,11 @@ contract PdexCore {
         _;
     }
 
+    modifier isCompany() {
+        require(companiesProfiles[msg.sender].approved, "Only companies are allowed to call this method");
+        _;
+    }
+
     // State changing functions
 
     // KRS restricted methods
@@ -94,6 +104,23 @@ contract PdexCore {
         investorsProfiles[_investorAddress].maxRiskRatio = _maxRiskRatio;
         investorsProfiles[_investorAddress].fromBroker = msg.sender;
         emit InvestorRegistered(msg.sender, _investorAddress, _maxRiskRatio);
+    }
+
+    // Company restricted methods
+
+    function claimPayout(uint _amount) public
+    isCompany()
+    {
+        require(tokenInstance.balanceOf(msg.sender) >= _amount && tokenInstance.allowance(msg.sender, address(this)) >= _amount);
+        tokenInstance.transferFrom(msg.sender, address(this), _amount);
+        companiesProfiles[msg.sender].payoutAmount = _amout;
+        emit PayoutClaimed(msg.sender, _amount);
+    }
+
+    // Investor restricted methods
+
+    function stakeProfit(address _companyAddress) {
+        
     }
 }
 
