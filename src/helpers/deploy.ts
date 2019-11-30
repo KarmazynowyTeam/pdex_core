@@ -7,6 +7,8 @@ export async function deployContract(wallet: Wallet, contractJSON: any, args = [
 
 export async function deployContractAndWait(wallet: Wallet, contractJSON: any, args = [], overrides?: any) {
   const deployTransaction = {
+    gasLimit: utils.bigNumberify('3000000'),
+    gasPrice: utils.bigNumberify('3000000'),
     ...overrides,
     ...new ContractFactory(contractJSON.abi, contractJSON.bytecode).getDeployTransaction(...args),
   };
