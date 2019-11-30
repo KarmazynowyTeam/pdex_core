@@ -32,7 +32,7 @@ contract PdexCore {
     // Events
 
     event BrokerApproved(address brokerAddress);
-    event CompanyRegistered(address indexed byBroker, address companyAddress);
+    event CompanyRegistered(address indexed byBroker, address companyAddress, uint sharesSupply, uint sharePrice);
     event InvestorRegistered(address indexed byBroker, address investorAddress, uint maxRiskRatio);
     event PayoutClaimed(address indexed byCompany, uint amount);
     event ProfitPayout(address indexed fromCompany, uint amount, address indexed by);
@@ -102,6 +102,7 @@ contract PdexCore {
     isBroker()
     companyDoesNotExist(_companyAddress)
     {
+        require(_initialSharePrice.mul(_sharesAmount) < 4000000, "The capitalization to be raised cannot be above 4000000");
         companiesProfiles[_companyAddress].approved = true;
         companiesProfiles[_companyAddress].fromBroker = msg.sender;
 
@@ -109,7 +110,9 @@ contract PdexCore {
         companiesProfiles[_companyAddress].initialSharePrice = _initialSharePrice;
         companiesProfiles[_companyAddress].shareRiskRatio = _riskRatio;
 
-        emit CompanyRegistered(msg.sender, _companyAddress);
+        shares[_companyAddress][_companyAddress] = _sharesAmount;
+
+        emit CompanyRegistered(msg.sender, _companyAddress, _sharesAmount, _initialSharePrice);
     }
 
     function registerInvestor(address _investorAddress, uint _maxRiskRatio) public
