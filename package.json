@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "openzeppelin-solidity": "^2.4.0"
+    "openzeppelin-solidity": "^2.4.0",
+    "truffle": "^5.1.2"
   }
 }
