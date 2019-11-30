@@ -1,9 +1,8 @@
-pragma solidity 0.5.11;
+pragma solidity 0.5.10;
 
-import "../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
-import "../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
 
-contract PdexStable is ERC20Mintable, ERC20Detailed {
+contract PdexStable is ERC20Mintable {
     string public constant name = 'PdexStable';
     string public constant symbol = 'PDEX';
     uint8 public constant decimals = 18;
