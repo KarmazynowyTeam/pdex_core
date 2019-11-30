@@ -16,7 +16,7 @@
     "typescript": "^3.7.2"
   },
   "scripts": {
-    "build:typechain": "npx typechain --target=ethers './build/contracts/*.json' --outDir=./typechain",
+    "build:typechain": "typechain --target=ethers './build/*.json' --outDir=./src/typechain",
     "build:contracts": "waffle .waffle.js",
     "build": "tsc"
   }
