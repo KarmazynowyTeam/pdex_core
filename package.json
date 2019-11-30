@@ -7,8 +7,7 @@
   "dependencies": {},
   "devDependencies": {
     "ethereum-waffle": "^2.1.0",
-    "openzeppelin-solidity": "^2.4.0",
-    "truffle": "^5.1.2"
+    "openzeppelin-solidity": "^2.4.0"
   },
   "scripts": {
     "build:contracts": "waffle .waffle.js"
