@@ -44,7 +44,7 @@ contract PdexCore {
 
     mapping(address => InvestorProfile) investorsProfiles;
     mapping(address => bool) brokers;
-    mapping(address => CompanyProfile) companiesProfiles;
+    mapping(address => CompanyProfile) public companiesProfiles;
 
     mapping(address => mapping(address => uint)) public shares;
 

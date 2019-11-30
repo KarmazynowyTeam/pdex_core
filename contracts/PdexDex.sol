@@ -23,12 +23,25 @@ contract PDexDex {
     }
 
     modifier doesCompanyExist(address _companyAddress) {
-        require(pDexCoreInstance.companiesProfiles[_companyAddress].approved, "Only registred companies shares can be traded");
+        (
+            bool _approve,
+            address _broker,
+            uint _sharesSupply,
+            uint _initialSharePrice,
+            uint _shareRiskRatio,
+            uint _raisedFunds,
+            uint _payoutAmount
+        ) = pDexCoreInstance.companiesProfiles(_companyAddress);
+        require(_approve, "Only registred companies shares can be traded");
         _;
     }
 
-    Offer[] bids;
-    Offer[] asks;
+    mapping(uint => Offer) bids;
+    uint bidsCount;
+
+    mapping(uint => Offer) asks;
+    uint asksCount;
+
 
     function addAskOffer(
         address _companyShares,
@@ -36,8 +49,20 @@ contract PDexDex {
         uint _sharePrice
     ) public
     doesCompanyExist(_companyShares)
-    {
-        asks.push(new Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender));
+    {   
+        if(asksCount == 0) {
+            asks[asksCount] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
+            asksCount++;
+            return;
+        }
+
+        if(_sharePrice < asks[asksCount - 1].sharePrice) {
+            asks[asksCount] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
+        }
+
+        asks[asksCount] = asks[asksCount - 1];
+        asks[asksCount - 1] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
+        asksCount++;
     }
 
     function addBidOffer(
@@ -47,6 +72,32 @@ contract PDexDex {
     ) public
     doesCompanyExist(_companyShares)
     {
-        bids.push(new Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender));
+        if(bidsCount == 0) {
+            bids[bidsCount] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
+            bidsCount++;
+            return;
+        }
+
+        if(_sharePrice > bids[bidsCount - 1].sharePrice) {
+            bids[bidsCount] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
+        }
+
+        bids[asksCount] = bids[bidsCount - 1];
+        bids[bidsCount - 1] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
+        bidsCount++;
+    }
+
+    function doOffersMatch() public
+    view returns(bool) {
+        if(bids[bidsCount].sharePrice > asks[asksCount].sharePrice) {
+            return true;
+        }
+        return false;
+    }
+
+    function matchOffers() public {
+        require(doOffersMatch(), "Last offers do not match");
+
+        // TODO execute the transaction, todo implement shares transfers on the other contract
     }
 }

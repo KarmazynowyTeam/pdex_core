@@ -12,16 +12,35 @@ import {
 
 interface PdexCoreInterface extends Interface {
   functions: {
+    registerCompany: TypedFunctionDescription<{
+      encode([_companyAddress, _sharesAmount, _initialSharePrice, _riskRatio]: [
+        string,
+        BigNumberish,
+        BigNumberish,
+        BigNumberish
+      ]): string;
+    }>;
+
     approveBroker: TypedFunctionDescription<{
       encode([_brokerAddress]: [string]): string;
+    }>;
+
+    companiesProfiles: TypedFunctionDescription<{
+      encode([]: [string]): string;
+    }>;
+
+    stakeProfit: TypedFunctionDescription<{
+      encode([_companyAddress]: [string]): string;
     }>;
 
     registerInvestor: TypedFunctionDescription<{
       encode([_investorAddress, _maxRiskRatio]: [string, BigNumberish]): string;
     }>;
 
-    registerCompany: TypedFunctionDescription<{
-      encode([_companyAddress]: [string]): string;
+    shares: TypedFunctionDescription<{ encode([,]: [string, string]): string }>;
+
+    claimPayout: TypedFunctionDescription<{
+      encode([_amount]: [BigNumberish]): string;
     }>;
   };
 
@@ -31,7 +50,12 @@ interface PdexCoreInterface extends Interface {
     }>;
 
     CompanyRegistered: TypedEventDescription<{
-      encodeTopics([byBroker, companyAddress]: [string | null, null]): string[];
+      encodeTopics([byBroker, companyAddress, sharesSupply, sharePrice]: [
+        string | null,
+        null,
+        null,
+        null
+      ]): string[];
     }>;
 
     InvestorRegistered: TypedEventDescription<{
@@ -39,6 +63,18 @@ interface PdexCoreInterface extends Interface {
         string | null,
         null,
         null
+      ]): string[];
+    }>;
+
+    PayoutClaimed: TypedEventDescription<{
+      encodeTopics([byCompany, amount]: [string | null, null]): string[];
+    }>;
+
+    ProfitPayout: TypedEventDescription<{
+      encodeTopics([fromCompany, amount, by]: [
+        string | null,
+        null,
+        string | null
       ]): string[];
     }>;
   };
@@ -58,8 +94,40 @@ export class PdexCore extends Contract {
   interface: PdexCoreInterface;
 
   functions: {
+    registerCompany(
+      _companyAddress: string,
+      _sharesAmount: BigNumberish,
+      _initialSharePrice: BigNumberish,
+      _riskRatio: BigNumberish,
+      overrides?: TransactionOverrides
+    ): Promise<ContractTransaction>;
+
     approveBroker(
       _brokerAddress: string,
+      overrides?: TransactionOverrides
+    ): Promise<ContractTransaction>;
+
+    companiesProfiles(
+      arg0: string
+    ): Promise<{
+      approved: boolean;
+      fromBroker: string;
+      sharesSupply: BigNumber;
+      initialSharePrice: BigNumber;
+      shareRiskRatio: BigNumber;
+      raisedFunds: BigNumber;
+      payoutAmount: BigNumber;
+      0: boolean;
+      1: string;
+      2: BigNumber;
+      3: BigNumber;
+      4: BigNumber;
+      5: BigNumber;
+      6: BigNumber;
+    }>;
+
+    stakeProfit(
+      _companyAddress: string,
       overrides?: TransactionOverrides
     ): Promise<ContractTransaction>;
 
@@ -69,14 +137,48 @@ export class PdexCore extends Contract {
       overrides?: TransactionOverrides
     ): Promise<ContractTransaction>;
 
-    registerCompany(
-      _companyAddress: string,
+    shares(arg0: string, arg1: string): Promise<BigNumber>;
+
+    claimPayout(
+      _amount: BigNumberish,
       overrides?: TransactionOverrides
     ): Promise<ContractTransaction>;
   };
 
+  registerCompany(
+    _companyAddress: string,
+    _sharesAmount: BigNumberish,
+    _initialSharePrice: BigNumberish,
+    _riskRatio: BigNumberish,
+    overrides?: TransactionOverrides
+  ): Promise<ContractTransaction>;
+
   approveBroker(
     _brokerAddress: string,
+    overrides?: TransactionOverrides
+  ): Promise<ContractTransaction>;
+
+  companiesProfiles(
+    arg0: string
+  ): Promise<{
+    approved: boolean;
+    fromBroker: string;
+    sharesSupply: BigNumber;
+    initialSharePrice: BigNumber;
+    shareRiskRatio: BigNumber;
+    raisedFunds: BigNumber;
+    payoutAmount: BigNumber;
+    0: boolean;
+    1: string;
+    2: BigNumber;
+    3: BigNumber;
+    4: BigNumber;
+    5: BigNumber;
+    6: BigNumber;
+  }>;
+
+  stakeProfit(
+    _companyAddress: string,
     overrides?: TransactionOverrides
   ): Promise<ContractTransaction>;
 
@@ -86,8 +188,10 @@ export class PdexCore extends Contract {
     overrides?: TransactionOverrides
   ): Promise<ContractTransaction>;
 
-  registerCompany(
-    _companyAddress: string,
+  shares(arg0: string, arg1: string): Promise<BigNumber>;
+
+  claimPayout(
+    _amount: BigNumberish,
     overrides?: TransactionOverrides
   ): Promise<ContractTransaction>;
 
@@ -96,7 +200,9 @@ export class PdexCore extends Contract {
 
     CompanyRegistered(
       byBroker: string | null,
-      companyAddress: null
+      companyAddress: null,
+      sharesSupply: null,
+      sharePrice: null
     ): EventFilter;
 
     InvestorRegistered(
@@ -104,16 +210,37 @@ export class PdexCore extends Contract {
       investorAddress: null,
       maxRiskRatio: null
     ): EventFilter;
+
+    PayoutClaimed(byCompany: string | null, amount: null): EventFilter;
+
+    ProfitPayout(
+      fromCompany: string | null,
+      amount: null,
+      by: string | null
+    ): EventFilter;
   };
 
   estimate: {
+    registerCompany(
+      _companyAddress: string,
+      _sharesAmount: BigNumberish,
+      _initialSharePrice: BigNumberish,
+      _riskRatio: BigNumberish
+    ): Promise<BigNumber>;
+
     approveBroker(_brokerAddress: string): Promise<BigNumber>;
+
+    companiesProfiles(arg0: string): Promise<BigNumber>;
+
+    stakeProfit(_companyAddress: string): Promise<BigNumber>;
 
     registerInvestor(
       _investorAddress: string,
       _maxRiskRatio: BigNumberish
     ): Promise<BigNumber>;
 
-    registerCompany(_companyAddress: string): Promise<BigNumber>;
+    shares(arg0: string, arg1: string): Promise<BigNumber>;
+
+    claimPayout(_amount: BigNumberish): Promise<BigNumber>;
   };
 }
