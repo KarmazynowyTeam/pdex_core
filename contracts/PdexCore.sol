@@ -46,7 +46,7 @@ contract PdexCore {
     mapping(address => bool) brokers;
     mapping(address => CompanyProfile) companiesProfiles;
 
-    mapping(address => mapping(address => uint)) shares;
+    mapping(address => mapping(address => uint)) public shares;
 
     constructor(address _tokenAddress, address _knfAddress) public {
         owner = msg.sender;
