@@ -15,5 +15,6 @@ export class WalletSdk {
     await futureWallet.waitForBalance();
     const deployment = await futureWallet.deploy(ensName, '1', ETHER_NATIVE_TOKEN.address);
     await deployment.waitToBeSuccess();
+    return {privateKey: futureWallet.privateKey, contractAddress: futureWallet.contractAddress};
   }
 }
