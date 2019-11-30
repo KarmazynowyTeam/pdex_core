@@ -3,9 +3,10 @@ pragma solidity 0.5.10;
 import 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
-using SafeMath for uint;
 
 contract PdexCore {
+
+    using SafeMath for uint;
 
     // Structs
 
@@ -21,6 +22,10 @@ contract PdexCore {
         uint sharesSupply;
         uint initialSharePrice;
 
+        uint shareRiskRatio;
+
+        uint raisedFunds;
+
         uint payoutAmount;
     }
 
@@ -30,6 +35,7 @@ contract PdexCore {
     event CompanyRegistered(address indexed byBroker, address companyAddress);
     event InvestorRegistered(address indexed byBroker, address investorAddress, uint maxRiskRatio);
     event PayoutClaimed(address indexed byCompany, uint amount);
+    event ProfitPayout(address indexed fromCompany, uint amount, address indexed by);
 
     address owner;
     address knf;
@@ -71,8 +77,8 @@ contract PdexCore {
         _;
     }
 
-    modifier isCompany() {
-        require(companiesProfiles[msg.sender].approved, "Only companies are allowed to call this method");
+    modifier isCompany(address _company) {
+        require(companiesProfiles[_company].approved, "Only companies are allowed to call this method");
         _;
     }
 
@@ -87,12 +93,22 @@ contract PdexCore {
 
     // Broker rertricted methods
 
-    function registerCompany(address _companyAddress) public
+    function registerCompany(
+        address _companyAddress,
+        uint _sharesAmount,
+        uint _initialSharePrice,
+        uint _riskRatio
+    ) public
     isBroker()
     companyDoesNotExist(_companyAddress)
     {
         companiesProfiles[_companyAddress].approved = true;
         companiesProfiles[_companyAddress].fromBroker = msg.sender;
+
+        companiesProfiles[_companyAddress].sharesSupply = _sharesAmount;
+        companiesProfiles[_companyAddress].initialSharePrice = _initialSharePrice;
+        companiesProfiles[_companyAddress].shareRiskRatio = _riskRatio;
+
         emit CompanyRegistered(msg.sender, _companyAddress);
     }
 
@@ -109,18 +125,22 @@ contract PdexCore {
     // Company restricted methods
 
     function claimPayout(uint _amount) public
-    isCompany()
+    isCompany(msg.sender)
     {
         require(tokenInstance.balanceOf(msg.sender) >= _amount && tokenInstance.allowance(msg.sender, address(this)) >= _amount);
         tokenInstance.transferFrom(msg.sender, address(this), _amount);
-        companiesProfiles[msg.sender].payoutAmount = _amout;
+        companiesProfiles[msg.sender].payoutAmount = _amount;
         emit PayoutClaimed(msg.sender, _amount);
     }
 
     // Investor restricted methods
 
-    function stakeProfit(address _companyAddress) {
-        
+    function stakeProfit(address _companyAddress) public
+    isCompany(msg.sender)
+    {
+        uint _payout =  shares[_companyAddress][msg.sender].div(companiesProfiles[_companyAddress].sharesSupply).mul(companiesProfiles[_companyAddress].payoutAmount);
+        tokenInstance.transferFrom(address(this), msg.sender, _payout);
+        emit ProfitPayout(_companyAddress, _payout, msg.sender);
     }
 }
 
