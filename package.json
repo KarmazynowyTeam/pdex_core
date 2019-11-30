@@ -5,9 +5,12 @@
   "author": "Marcello Bardus",
   "license": "MIT",
   "dependencies": {
+    "@universal-login/sdk": "^1.0.0-beta.0",
     "ethers": "^4.0.40"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.5",
+    "chai": "^4.2.0",
     "ethereum-waffle": "^2.1.0",
     "openzeppelin-solidity": "^2.4.0",
     "tsc": "^1.20150623.0",
@@ -16,7 +19,8 @@
     "typescript": "^3.7.2"
   },
   "scripts": {
-    "build:typechain": "typechain --target=ethers './build/*.json' --outDir=./src/typechain",
+    "postinstall":"yarn typechain",
+    "typechain": "typechain --target=ethers './build/*.json' --outDir=./typechain-build",
     "build:contracts": "waffle .waffle.js",
     "build": "tsc"
   }
