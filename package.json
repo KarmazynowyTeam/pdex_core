@@ -1,22 +1,26 @@
 {
   "name": "pdex-core",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": "Marcello Bardus",
   "license": "MIT",
   "dependencies": {
-    "ethers": "^4.0.40"
+    "@universal-login/sdk": "^1.0.0-beta.0",
+    "ethers": "^4.0.40",
+    "typechain": "^1.0.3",
+    "typechain-target-ethers": "^1.0.3"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.5",
+    "chai": "^4.2.0",
     "ethereum-waffle": "^2.1.0",
     "openzeppelin-solidity": "^2.4.0",
     "tsc": "^1.20150623.0",
-    "typechain": "^1.0.3",
-    "typechain-target-ethers": "^1.0.3",
     "typescript": "^3.7.2"
   },
   "scripts": {
-    "build:typechain": "typechain --target=ethers './build/*.json' --outDir=./src/typechain",
+    "postinstall":"yarn typechain",
+    "typechain": "typechain --target=ethers './build/*.json' --outDir=./typechain-build",
     "build:contracts": "waffle .waffle.js",
     "build": "tsc"
   }

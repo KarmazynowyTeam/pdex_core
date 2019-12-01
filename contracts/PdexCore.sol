@@ -36,6 +36,8 @@ contract PdexCore {
     event InvestorRegistered(address indexed byBroker, address investorAddress, uint maxRiskRatio);
     event PayoutClaimed(address indexed byCompany, uint amount);
     event ProfitPayout(address indexed fromCompany, uint amount, address indexed by);
+    event ShareTransfer(address indexed companyShares, uint amount, address indexed from, address indexed to);
+    event Allowance(address indexed companyShares, uint amount, address allower, address allowed);
 
     address owner;
     address knf;
@@ -47,6 +49,7 @@ contract PdexCore {
     mapping(address => CompanyProfile) public companiesProfiles;
 
     mapping(address => mapping(address => uint)) public shares;
+    mapping(address = mapping(address => mapping(address => uint))) public allowances;
 
     constructor(address _tokenAddress, address _knfAddress) public {
         owner = msg.sender;
@@ -74,6 +77,11 @@ contract PdexCore {
 
     modifier investorIsNotRegistered(address _investorAddress) {
         require(!investorsProfiles[_investorAddress].approved, "User with the given address already exists");
+        _;
+    }
+
+    modifier investorRegistered(address _investorAddress) {
+        require(investorsProfiles[_investorAddress].approved, "User with the given address does not exists");
         _;
     }
 
@@ -144,6 +152,31 @@ contract PdexCore {
         uint _payout =  shares[_companyAddress][msg.sender].div(companiesProfiles[_companyAddress].sharesSupply).mul(companiesProfiles[_companyAddress].payoutAmount);
         tokenInstance.transferFrom(address(this), msg.sender, _payout);
         emit ProfitPayout(_companyAddress, _payout, msg.sender);
+    }
+
+    function transferShare(
+        address _companyAddress,
+        uint _amount,
+        address _recipient,
+        address _sender
+    ) public investorRegistered(_recipient) investorRegistered(_sender) isCompany(_companyAddress) {
+        require(allowances[msg.sender][_companyAddress][_sender] || _sender == msg.sender >= _amount, "You're not allowed to spend such an amount of tokens");
+        require(shares[_companyAddress][_sender] > _amount, "Unsufficient shares");
+        shares[_companyAddress][_sender] -= _amount;
+        shares[_companyAddress][_recipient] += _amount;
+        emit ShareTransfer(_companyAddress, _amount, _sender, _recipient);
+    }
+
+    function allowShareSpending(address _companyAddress, uint _amount, address _allowed) public {
+        require(shares[_companyAddress][msg.sender] > _amount, "Unsufficient shares");
+        allowances[_allowed][_companyAddress][msg.sender] = _amount;
+        emit Allowance(_companyAddress, _amount, msg.sender, _allowed);
+    }
+
+    // Getters
+
+    function getAllowance(address _allowed, address _companyAddress, address _sharesOwner) public view returns(uint) {
+        return allowances[_allowed][_companyAddress][_sharesOwner];
     }
 }
 
