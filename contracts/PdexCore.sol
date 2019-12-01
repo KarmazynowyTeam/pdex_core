@@ -49,7 +49,7 @@ contract PdexCore {
     mapping(address => CompanyProfile) public companiesProfiles;
 
     mapping(address => mapping(address => uint)) public shares;
-    mapping(address = mapping(address => mapping(address => uint))) public allowances;
+    mapping(address => mapping(address => mapping(address => uint))) public allowances;
 
     constructor(address _tokenAddress, address _knfAddress) public {
         owner = msg.sender;
@@ -160,7 +160,7 @@ contract PdexCore {
         address _recipient,
         address _sender
     ) public investorRegistered(_recipient) investorRegistered(_sender) isCompany(_companyAddress) {
-        require(allowances[msg.sender][_companyAddress][_sender] || _sender == msg.sender >= _amount, "You're not allowed to spend such an amount of tokens");
+        require(allowances[msg.sender][_companyAddress][_sender] >= _amount || _sender == msg.sender, "You're not allowed to spend such an amount of tokens");
         require(shares[_companyAddress][_sender] > _amount, "Unsufficient shares");
         shares[_companyAddress][_sender] -= _amount;
         shares[_companyAddress][_recipient] += _amount;

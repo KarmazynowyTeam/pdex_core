@@ -1,2 +1,2 @@
-export {PDexSdk} from './PDexSdk';
-export {WalletSdk} from './WalletSdk';
+export { PDexSdk } from './PDexSdk';
+export { WalletSdk } from './WalletSdk';

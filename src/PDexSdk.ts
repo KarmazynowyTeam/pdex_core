@@ -3,19 +3,18 @@ import { constants, Contract, providers, utils } from 'ethers';
 import ContractBuild from '../build/PdexCore.json';
 import UniversalLoginSdk from '@universal-login/sdk';
 
-
 export class PDexSdk {
   private provider: providers.JsonRpcProvider;
   private coreInstance: PdexCore;
-  constructor(private privateKey: string, 
-    private userAddress: string, 
-    private coreAddress: string, 
-    providerUrl: string, 
-    private sdk: UniversalLoginSdk) 
-  {
+  constructor(
+    private privateKey: string,
+    private userAddress: string,
+    private coreAddress: string,
+    providerUrl: string,
+    private sdk: UniversalLoginSdk,
+  ) {
     this.provider = new providers.JsonRpcProvider(providerUrl);
     this.coreInstance = new Contract(coreAddress, ContractBuild.abi, this.provider) as PdexCore;
-    
   }
 
   async approveBroker(brokerAddress: string) {
@@ -38,9 +37,13 @@ export class PDexSdk {
     return this.executeCoreFunction('stakeProfit', [companyAddress]);
   }
 
+  async allowShareSpending(companyAddress: string, amount: string, allowed: string) {
+    return this.executeCoreFunction('allowShareSpending', [companyAddress, amount, allowed]);
+  }
+
   async executeCoreFunction(functionName: string, args: string[]) {
     const data = this.coreInstance.interface.functions[functionName].encode(args);
-    const {waitToBeSuccess} = await this.sdk.execute(this.getMessage(data, this.coreAddress), this.privateKey);
+    const { waitToBeSuccess } = await this.sdk.execute(this.getMessage(data, this.coreAddress), this.privateKey);
     await waitToBeSuccess();
   }
 
@@ -52,7 +55,7 @@ export class PDexSdk {
       gasPrice: utils.bigNumberify(9000000000),
       gasLimit: utils.bigNumberify(220000),
       gasToken: constants.AddressZero,
-      value: 0
-    }
+      value: 0,
+    };
   }
 }

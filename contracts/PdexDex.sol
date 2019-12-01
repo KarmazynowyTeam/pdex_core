@@ -52,7 +52,7 @@ contract PDexDex {
     ) public
     doesCompanyExist(_companyShares)
     {   
-        require(pDexCoreInstance.getAllowance(address(this), _companyShares, msg.sender >= _sharesAmount), "To add an offer you to allow the DEX contract to spend your shares");
+        require(pDexCoreInstance.getAllowance(address(this), _companyShares, msg.sender) >= _sharesAmount, "To add an offer you to allow the DEX contract to spend your shares");
         if(asksCount == 0) {
             asks[asksCount] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
             asksCount++;
@@ -76,7 +76,6 @@ contract PDexDex {
     doesCompanyExist(_companyShares)
     {   
         require(tokenInstance.balanceOf(msg.sender) >= _sharesAmount * _sharePrice && tokenInstance.allowance(msg.sender, address(this)) >= _sharesAmount * _sharePrice);
-        require(pDexCoreInstance.getAllowance(address(this), _companyShares, msg.sender >= _sharesAmount), "To add an offer you to allow the DEX contract to spend your shares");
         if(bidsCount == 0) {
             bids[bidsCount] = Offer(_companyShares, _sharesAmount, _sharePrice, msg.sender);
             bidsCount++;
@@ -107,12 +106,14 @@ contract PDexDex {
         address _bidder = bids[bidsCount].issuer;
         address _asker = asks[asksCount].issuer;
 
+        uint _amount;
+
         if(bids[bidsCount].sharesAmount > asks[asksCount].sharesAmount) {
-            uint _amount = bids[bidsCount].sharesAmount - asks[asksCount].sharesAmount;
+            _amount = bids[bidsCount].sharesAmount - asks[asksCount].sharesAmount;
         } else if(bids[bidsCount].sharesAmount == asks[asksCount].sharesAmount) {
-            uint _amount = bids[bidsCount].sharesAmount;
+            _amount = bids[bidsCount].sharesAmount;
         } else {
-            uint _amount = asks[asksCount].sharesAmount - bids[bidsCount].sharesAmount;
+            _amount = asks[asksCount].sharesAmount - bids[bidsCount].sharesAmount;
         }
 
         tokenInstance.transferFrom(_bidder, _asker, _amount * asks[asksCount].sharePrice);
